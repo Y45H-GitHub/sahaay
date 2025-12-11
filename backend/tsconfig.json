@@ -15,7 +15,8 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "types": [
-      "node"
+      "node",
+      "jest"
     ]
   },
   "include": [

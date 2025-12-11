@@ -29,7 +29,13 @@
   - **Git commit and push: "Add backend API foundation with Express server and routes"**
   - _Requirements: 1.4, 2.2, 3.2_
 
-- [-] 3. Implement Murf Falcon TTS service
+- [x] 3. Implement Murf Falcon TTS service
+
+
+
+
+
+
 
 
 
@@ -41,15 +47,18 @@
   - **Git commit and push: "Implement Murf Falcon TTS service with multi-language support"**
   - _Requirements: 1.5, 2.6, 3.5, 4.5, 9.4_
 
-- [ ]* 3.1 Write property test for TTS service
+- [x]* 3.1 Write property test for TTS service
   - **Property 14: TTS conversion and playback**
   - **Validates: Requirements 2.6, 3.5, 4.5**
 
-- [ ]* 3.2 Write property test for language-voice mapping
+- [x]* 3.2 Write property test for language-voice mapping
   - **Property 32: Language selection changes TTS voice**
   - **Validates: Requirements 9.4**
 
-- [ ] 4. Implement vision and scene description service
+- [-] 4. Implement vision and scene description service
+
+
+
   - Create VisionService class for object detection
   - Integrate with OpenAI GPT-4 Vision API or alternative
   - Implement object detection with bounding boxes

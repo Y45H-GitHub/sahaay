@@ -19,10 +19,21 @@ export interface MurfTTSConfig {
 }
 
 export interface MurfAPIResponse {
-    audio_url?: string;
-    audio_base64?: string;
-    status: string;
-    message?: string;
+    audioFile?: string; // Base64 encoded audio
+    encodedAudio?: string; // Alternative field name
+    audioUrl?: string;
+    audioLengthInSeconds?: number;
+    wordDurations?: Array<{
+        word: string;
+        startMs: number;
+        endMs: number;
+        sourceWordIndex: number;
+        pitchScaleMinimum: number;
+        pitchScaleMaximum: number;
+    }>;
+    warning?: string;
+    consumedCharacterCount?: number;
+    remainingCharacterCount?: number;
 }
 
 export class MurfTTSService {
@@ -35,13 +46,14 @@ export class MurfTTSService {
         this.config = config;
 
         // Language to voice ID mapping for Murf Falcon TTS
+        // Updated with actual Murf voice IDs from API
         this.languageVoiceMapping = {
-            'en': 'en-US-neural-male-1', // English voice
-            'english': 'en-US-neural-male-1',
-            'hi': 'hi-IN-neural-female-1', // Hindi voice
-            'hindi': 'hi-IN-neural-female-1',
-            'hinglish': 'en-IN-neural-male-1', // Hinglish (Indian English) voice
-            'en-in': 'en-IN-neural-male-1'
+            'en': 'en-US-edmund', // English voice (US)
+            'english': 'en-US-edmund',
+            'hi': 'hi-IN-kabir', // Hindi voice (Male)
+            'hindi': 'hi-IN-kabir',
+            'hinglish': 'en-AU-mitch', // Hinglish (supports en-IN locale)
+            'en-in': 'en-AU-mitch'
         };
     }
 
@@ -73,14 +85,21 @@ export class MurfTTSService {
             try {
                 const response = await this.makeAPICall(text, voiceId);
 
-                if (response.data.status === 'success') {
+                // Check if response is successful (status 200-299)
+                if (response.status >= 200 && response.status < 300) {
+                    const audioBase64 = response.data.audioFile || response.data.encodedAudio;
+
+                    if (!audioBase64) {
+                        throw new Error('No audio data received from Murf API');
+                    }
+
                     return {
-                        audioUrl: response.data.audio_url,
-                        audioBase64: response.data.audio_base64,
+                        audioUrl: response.data.audioUrl,
+                        audioBase64: audioBase64,
                         success: true
                     };
                 } else {
-                    throw new Error(response.data.message || 'TTS conversion failed');
+                    throw new Error('TTS conversion failed');
                 }
             } catch (error) {
                 lastError = error as Error;
@@ -116,21 +135,28 @@ export class MurfTTSService {
      * Make API call to Murf Falcon TTS
      */
     private async makeAPICall(text: string, voiceId: string): Promise<AxiosResponse<MurfAPIResponse>> {
+        // Updated payload format based on Murf API documentation
         const payload = {
+            voiceId: voiceId,
+            style: "Conversational",
             text: text,
-            voice_id: voiceId,
-            format: 'mp3',
-            sample_rate: 22050,
-            return_base64: true // Request both URL and base64
+            rate: 0,
+            pitch: 0,
+            sampleRate: 24000, // Valid sample rate according to API
+            format: "MP3",
+            channelType: "MONO",
+            pronunciationDictionary: {},
+            encodeAsBase64: true
         };
 
         const headers = {
-            'Authorization': `Bearer ${this.config.apiKey}`,
+            'api-key': this.config.apiKey,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         };
 
-        return await axios.post(`${this.config.apiUrl}/tts/generate`, payload, {
+        // Updated endpoint based on Murf API documentation
+        return await axios.post(`${this.config.apiUrl}/speech/generate`, payload, {
             headers,
             timeout: 30000 // 30 second timeout
         });
