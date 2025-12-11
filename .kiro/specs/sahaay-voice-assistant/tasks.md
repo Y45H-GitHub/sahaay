@@ -55,7 +55,9 @@
   - **Property 32: Language selection changes TTS voice**
   - **Validates: Requirements 9.4**
 
-- [-] 4. Implement vision and scene description service
+- [x] 4. Implement vision and scene description service
+
+
 
 
 
@@ -75,7 +77,10 @@
   - **Property 10: Scene analysis generates natural language description**
   - **Validates: Requirements 2.5**
 
-- [ ] 5. Implement OCR service
+- [-] 5. Implement OCR service
+
+
+
   - Create OCRService class
   - Integrate with Tesseract.js or Google Cloud Vision
   - Implement text extraction from images
