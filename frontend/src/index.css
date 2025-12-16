@@ -1,68 +1,209 @@
+/* CSS Variables for High-Contrast Accessible Theme */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Colors - High contrast black and white theme */
+  --color-background: #000000;
+  --color-text: #FFFFFF;
+  --color-button-bg: #000000;
+  --color-button-border: #FFFFFF;
+  --color-focus: #FFFFFF;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Typography */
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-base: 18px;
+  --font-size-large: 24px;
+  --font-size-xlarge: 32px;
+  --font-weight-bold: 700;
+  --line-height: 1.4;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Spacing */
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+  --spacing-xxl: 64px;
+
+  /* Layout */
+  --border-radius: 8px;
+  --border-width: 2px;
+  --focus-outline-width: 4px;
+
+  /* Accessibility */
+  --min-touch-target: 44px;
+  --button-height: 80px;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* Global Reset and Base Styles */
+* {
+  box-sizing: border-box;
 }
-a:hover {
-  color: #535bf2;
+
+html {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  padding: 0;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background-color: var(--color-background);
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+
+  /* Accessibility improvements */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Typography - All text bold and minimum 18px */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+button,
+input,
+label,
+a {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: var(--font-size-xlarge);
+  margin: var(--spacing-md) 0;
 }
 
+h2 {
+  font-size: var(--font-size-large);
+  margin: var(--spacing-sm) 0;
+}
+
+p {
+  margin: var(--spacing-sm) 0;
+}
+
+/* Button Styles - Accessible and high contrast */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background-color: var(--color-button-bg);
+  border: var(--border-width) solid var(--color-button-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-md);
+  min-height: var(--min-touch-target);
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.2s ease;
+
+  /* Ensure buttons are accessible */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
+
 button:hover {
-  border-color: #646cff;
+  background-color: var(--color-text);
+  color: var(--color-background);
 }
+
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: var(--focus-outline-width) solid var(--color-focus);
+  outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: light) {
+button:active {
+  transform: scale(0.98);
+}
+
+/* Links */
+a {
+  color: var(--color-text);
+  text-decoration: underline;
+  font-weight: var(--font-weight-bold);
+}
+
+a:hover {
+  background-color: var(--color-text);
+  color: var(--color-background);
+}
+
+a:focus {
+  outline: var(--focus-outline-width) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Responsive Layout Structure */
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Accessibility - Ensure all interactive elements meet minimum size requirements */
+input,
+select,
+textarea {
+  min-height: var(--min-touch-target);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  border: var(--border-width) solid var(--color-text);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: var(--focus-outline-width) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --border-width: 3px;
+    --focus-outline-width: 5px;
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

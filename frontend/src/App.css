@@ -1,42 +1,244 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/* Main App Container */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+/* Header with Language Selector */
+.app-header {
+  padding: var(--spacing-md);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: var(--border-width) solid var(--color-text);
+}
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.language-select {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  padding: var(--spacing-sm) var(--spacing-md);
+  min-height: var(--min-touch-target);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  border: var(--border-width) solid var(--color-text);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.language-select:focus {
+  outline: var(--focus-outline-width) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Main Content Area */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-lg);
+}
+
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  width: 100%;
+  max-width: 600px;
+  align-items: center;
+}
+
+/* Individual Action Buttons - Full screen sizing for accessibility */
+.action-button {
+  width: 100%;
+  height: var(--button-height);
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-bold);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  border: var(--border-width) solid var(--color-text);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  /* Ensure buttons are accessible */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+
+  /* Center text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.action-button:hover {
+  background-color: var(--color-text);
+  color: var(--color-background);
+  transform: scale(1.02);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.action-button:focus {
+  outline: var(--focus-outline-width) solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+.action-button:active {
+  transform: scale(0.98);
+}
+
+/* Footer with Microphone Button */
+.app-footer {
+  padding: var(--spacing-lg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: var(--border-width) solid var(--color-text);
+}
+
+/* Microphone Button - Large round button at bottom */
+.microphone-button {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  font-size: var(--font-size-xlarge);
+  font-weight: var(--font-weight-bold);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  border: var(--border-width) solid var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  /* Center the microphone icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Ensure accessibility */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.microphone-button:hover {
+  background-color: var(--color-text);
+  color: var(--color-background);
+  transform: scale(1.05);
+}
+
+.microphone-button:focus {
+  outline: var(--focus-outline-width) solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+.microphone-button:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-main {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
   }
-  to {
-    transform: rotate(360deg);
+
+  .action-buttons {
+    gap: var(--spacing-md);
+  }
+
+  .action-button {
+    height: 70px;
+    font-size: var(--font-size-base);
+  }
+
+  .microphone-button {
+    width: 80px;
+    height: 80px;
+    font-size: var(--font-size-large);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@media (max-width: 480px) {
+  .app-header {
+    padding: var(--spacing-sm);
+  }
+
+  .app-main {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+
+  .action-buttons {
+    gap: var(--spacing-sm);
+  }
+
+  .action-button {
+    height: 60px;
+  }
+
+  .microphone-button {
+    width: 70px;
+    height: 70px;
+    font-size: var(--font-size-base);
   }
 }
 
-.card {
-  padding: 2em;
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+  .action-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .action-button {
+    flex: 1;
+    min-width: 200px;
+    max-width: 300px;
+    height: 60px;
+  }
+
+  .app-main {
+    padding: var(--spacing-sm);
+  }
 }
 
-.read-the-docs {
-  color: #888;
+/* High contrast mode enhancements */
+@media (prefers-contrast: high) {
+
+  .action-button,
+  .microphone-button,
+  .language-select {
+    border-width: 3px;
+  }
+
+  .action-button:focus,
+  .microphone-button:focus,
+  .language-select:focus {
+    outline-width: 6px;
+  }
+}
+
+/* Print styles (accessibility requirement) */
+@media print {
+  .app {
+    background-color: white;
+    color: black;
+  }
+
+  .microphone-button {
+    display: none;
+  }
 }
