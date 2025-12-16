@@ -4,7 +4,7 @@
  * Includes retry logic, error handling, and offline request queuing
  */
 
-import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 // API Response Types (matching backend types)
 export interface VoiceQueryResponse {
@@ -60,14 +60,14 @@ export interface ErrorResponse {
 // Request queue for offline mode
 interface QueuedRequest {
     id: string;
-    config: AxiosRequestConfig;
+    config: any;
     resolve: (value: any) => void;
     reject: (error: any) => void;
     timestamp: number;
 }
 
 class ApiClient {
-    private client: AxiosInstance;
+    private client: any;
     private requestQueue: QueuedRequest[] = [];
     private isOnline: boolean = navigator.onLine;
     private retryAttempts: number = 3;
@@ -77,7 +77,7 @@ class ApiClient {
         // Get base URL from environment or default to localhost
         const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
-        this.client = axios.create({
+        this.client = (axios as any).create({
             baseURL,
             timeout: 30000, // 30 second timeout
             headers: {
@@ -95,13 +95,13 @@ class ApiClient {
     private setupInterceptors(): void {
         // Request interceptor
         this.client.interceptors.request.use(
-            (config) => {
+            (config: any) => {
                 // Add timestamp to requests
                 config.metadata = { startTime: Date.now() };
                 console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
                 return config;
             },
-            (error) => {
+            (error: any) => {
                 console.error('[API] Request error:', error);
                 return Promise.reject(error);
             }
@@ -109,12 +109,12 @@ class ApiClient {
 
         // Response interceptor
         this.client.interceptors.response.use(
-            (response) => {
+            (response: any) => {
                 const duration = Date.now() - (response.config.metadata?.startTime || 0);
                 console.log(`[API] ${response.status} ${response.config.url} (${duration}ms)`);
                 return response;
             },
-            async (error: AxiosError) => {
+            async (error: any) => {
                 const config = error.config;
 
                 // Don't retry if no config or already retried max times
@@ -176,7 +176,7 @@ class ApiClient {
     /**
      * Format axios error into consistent error response
      */
-    private formatError(error: AxiosError): ErrorResponse {
+    private formatError(error: any): ErrorResponse {
         if (error.response?.data) {
             return error.response.data as ErrorResponse;
         }
@@ -192,7 +192,7 @@ class ApiClient {
     /**
      * Make API request with offline queueing support
      */
-    private async makeRequest<T>(config: AxiosRequestConfig): Promise<T> {
+    private async makeRequest<T>(config: any): Promise<T> {
         if (!this.isOnline) {
             // Queue request for when connection is restored
             return new Promise<T>((resolve, reject) => {
@@ -228,6 +228,25 @@ class ApiClient {
             method: 'POST',
             url: '/api/voice-query',
             data: formData,
+        });
+    }
+
+    /**
+     * Send text query to backend (for when we already have transcript)
+     */
+    async sendTextQuery(text: string, language: string): Promise<VoiceQueryResponse> {
+        const data = {
+            text,
+            language,
+        };
+
+        return this.makeRequest<VoiceQueryResponse>({
+            method: 'POST',
+            url: '/api/voice-query',
+            data,
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
     }
 
@@ -360,6 +379,7 @@ export default apiClient;
 // Export individual methods for easier importing
 export const {
     sendVoiceQuery,
+    sendTextQuery,
     getSceneDescription,
     readText,
     findObject,

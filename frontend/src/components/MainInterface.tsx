@@ -210,46 +210,50 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
     const handleVoiceTranscript = useCallback(async (transcript: string) => {
         if (!transcript.trim()) return;
 
+        // Only process voice queries when in general mode
+        if (activeMode !== 'general') return;
+
         setAppState('processing');
         triggerProcessingHaptic();
 
         try {
-            // TODO: Send transcript to backend API
             console.log('Processing voice query:', transcript);
 
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Send transcript directly to backend for processing
+            // The backend will handle intent classification and response generation
+            const response = await apiClient.sendTextQuery(transcript, language);
 
-            // Mock response
-            const mockResponse = {
-                text: `I heard you say: "${transcript}". This is a mock response. The backend integration will provide real answers.`
-            };
+            console.log('Voice query response:', response);
 
-            // Convert response to speech
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(mockResponse.text);
-                utterance.rate = 0.9;
-                utterance.volume = 1.0;
-
-                utterance.onstart = () => {
-                    setAppState('playing');
-                };
-
-                utterance.onend = () => {
-                    setAppState('idle');
-                    setActiveMode(null);
-                };
-
-                speechSynthesis.speak(utterance);
+            // Set audio for playback if provided by backend
+            if (response.audioUrl) {
+                setAudioUrl(response.audioUrl);
+                setAudioBase64(response.audioBase64);
             } else {
-                setAppState('idle');
-                setActiveMode(null);
+                // Fallback to browser TTS if no audio URL provided
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(response.response);
+                    utterance.rate = 0.9;
+                    utterance.volume = 1.0;
+
+                    utterance.onstart = () => {
+                        setAppState('playing');
+                    };
+
+                    utterance.onend = () => {
+                        setAppState('idle');
+                        setActiveMode(null);
+                    };
+
+                    speechSynthesis.speak(utterance);
+                    return;
+                }
             }
 
         } catch (error) {
             handleError(error as Error, 'Failed to process your question. Please try again.');
         }
-    }, [handleError]);
+    }, [activeMode, language, handleError]);
 
     /**
      * Handle voice input errors

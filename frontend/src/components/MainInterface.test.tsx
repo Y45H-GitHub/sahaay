@@ -50,6 +50,26 @@ vi.mock('../services/HapticFeedback', () => ({
     triggerErrorHaptic: vi.fn()
 }));
 
+// Mock API client
+vi.mock('../services/ApiClient', () => ({
+    default: {
+        sendTextQuery: vi.fn().mockResolvedValue({
+            intent: 'general',
+            response: 'This is a test response',
+            audioUrl: null
+        }),
+        getSceneDescription: vi.fn().mockResolvedValue({
+            description: 'Test scene description',
+            objects: [],
+            audioUrl: null
+        }),
+        readText: vi.fn().mockResolvedValue({
+            text: 'Test extracted text',
+            audioUrl: null
+        })
+    }
+}));
+
 // Mock speech synthesis
 Object.defineProperty(window, 'speechSynthesis', {
     writable: true,
@@ -276,5 +296,51 @@ describe('MainInterface', () => {
         actionButtons.forEach(button => {
             expect(button).toHaveClass('action-button');
         });
+    });
+
+    it('processes voice transcript when in general mode', async () => {
+        const { default: apiClient } = await import('../services/ApiClient');
+
+        render(
+            <MainInterface
+                language="en"
+                onLanguageChange={mockOnLanguageChange}
+            />
+        );
+
+        // First activate general mode
+        const askSahaayButton = screen.getByRole('button', { name: /ask sahaay a general question using voice/i });
+        fireEvent.click(askSahaayButton);
+
+        // Then trigger voice input
+        const voiceButton = screen.getByTestId('voice-input-button');
+        fireEvent.click(voiceButton);
+
+        // Wait for API call
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Verify API was called with correct parameters
+        expect(apiClient.sendTextQuery).toHaveBeenCalledWith('test transcript', 'en');
+    });
+
+    it('ignores voice transcript when not in general mode', async () => {
+        const { default: apiClient } = await import('../services/ApiClient');
+
+        render(
+            <MainInterface
+                language="en"
+                onLanguageChange={mockOnLanguageChange}
+            />
+        );
+
+        // Don't activate any mode, just trigger voice input
+        const voiceButton = screen.getByTestId('voice-input-button');
+        fireEvent.click(voiceButton);
+
+        // Wait for potential API call
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Verify API was NOT called
+        expect(apiClient.sendTextQuery).not.toHaveBeenCalled();
     });
 });
