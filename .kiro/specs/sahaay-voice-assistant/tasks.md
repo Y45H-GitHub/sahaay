@@ -77,7 +77,9 @@
   - **Property 10: Scene analysis generates natural language description**
   - **Validates: Requirements 2.5**
 
-- [-] 5. Implement OCR service
+- [x] 5. Implement OCR service
+
+
 
 
 
@@ -93,7 +95,12 @@
   - **Property 12: Extracted text is cleaned before TTS**
   - **Validates: Requirements 3.4**
 
-- [ ] 6. Implement LLM service for general questions
+- [x] 6. Implement LLM service for general questions
+
+
+
+
+
   - Create LLMService class
   - Integrate with OpenAI GPT-4 or alternative
   - Handle date/time queries with current timestamp
@@ -110,7 +117,11 @@
   - Test that timer queries return acknowledgment responses
   - _Requirements: 4.4_
 
-- [ ] 7. Implement intent classification service
+- [x] 7. Implement intent classification service
+
+
+
+
   - Create IntentClassifier class
   - Implement keyword-based intent detection
   - Classify intents: scene, text, general, finder, emergency
