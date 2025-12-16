@@ -122,6 +122,7 @@
 
 
 
+
   - Create IntentClassifier class
   - Implement keyword-based intent detection
   - Classify intents: scene, text, general, finder, emergency
@@ -134,7 +135,10 @@
   - Test that "Sahaay, emergency" triggers emergency intent
   - _Requirements: 6.1_
 
-- [ ] 8. Implement backend API routes
+- [-] 8. Implement backend API routes
+
+
+
   - Implement POST /api/scene-description endpoint
   - Implement POST /api/read-text endpoint
   - Implement POST /api/voice-query endpoint with intent routing
