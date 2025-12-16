@@ -37,7 +37,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const intervalRef = useRef<number | null>(null);
 
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
     const [isCapturing, setIsCapturing] = useState(false);
@@ -238,6 +238,18 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
         return cleanup;
     }, [isActive]);
 
+    // Auto-capture for scene and text modes when camera is ready
+    useEffect(() => {
+        if (isActive && hasPermission === true && !continuous && (mode === 'scene' || mode === 'text')) {
+            // Small delay to ensure video is ready
+            const timer = setTimeout(() => {
+                captureSingleFrame();
+            }, 500);
+
+            return () => clearTimeout(timer);
+        }
+    }, [isActive, hasPermission, continuous, mode]);
+
     // Handle continuous vs single capture mode
     useEffect(() => {
         if (!isActive || hasPermission !== true) return;
@@ -285,7 +297,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({
             </div>
 
             {/* Manual capture button for testing (hidden in production) */}
-            {process.env.NODE_ENV === 'development' && hasPermission === true && (
+            {import.meta.env.DEV && hasPermission === true && (
                 <button
                     onClick={captureSingleFrame}
                     disabled={isCapturing}

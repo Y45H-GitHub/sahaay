@@ -47,7 +47,7 @@ Object.defineProperty(window, 'speechSynthesis', {
 
 Object.defineProperty(window, 'SpeechSynthesisUtterance', {
     writable: true,
-    value: function (text) {
+    value: function (text: string) {
         return {
             text,
             rate: 1,
@@ -257,8 +257,9 @@ describe('CameraCapture', () => {
 
     it('shows development test button in development mode', async () => {
         // Mock NODE_ENV for development
-        const originalEnv = process.env.NODE_ENV
-        process.env.NODE_ENV = 'development'
+        const originalEnv = import.meta.env.DEV
+        // @ts-ignore
+        import.meta.env.DEV = true
 
         render(
             <CameraCapture
@@ -275,7 +276,8 @@ describe('CameraCapture', () => {
         expect(screen.getByText(/test capture/i)).toBeInTheDocument()
 
         // Restore original NODE_ENV
-        process.env.NODE_ENV = originalEnv
+        // @ts-ignore
+        import.meta.env.DEV = originalEnv
     })
 
     it('handles unsupported browser gracefully', async () => {

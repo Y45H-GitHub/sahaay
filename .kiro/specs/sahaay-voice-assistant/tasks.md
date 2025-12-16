@@ -135,7 +135,9 @@
   - Test that "Sahaay, emergency" triggers emergency intent
   - _Requirements: 6.1_
 
-- [-] 8. Implement backend API routes
+- [x] 8. Implement backend API routes
+
+
 
 
 
@@ -161,10 +163,20 @@
   - **Property 13: General queries route to LLM**
   - **Validates: Requirements 4.2**
 
-- [ ] 9. Checkpoint - Ensure backend tests pass
+
+- [x] 9. Checkpoint - Ensure backend tests pass
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 10. Implement frontend foundation
+
+
+
+- [x] 10. Implement frontend foundation
+
+
   - Create main App component with routing
   - Set up global styles with high-contrast theme (#000000 background, #FFFFFF text)
   - Create CSS variables for colors, fonts, and spacing
@@ -190,7 +202,11 @@
   - **Property 28: All text uses bold typography**
   - **Validates: Requirements 7.7**
 
-- [ ] 11. Implement haptic feedback service
+- [x] 11. Implement haptic feedback service
+
+
+
+
   - Create HapticFeedback service class
   - Define haptic patterns (listening: short pulse, processing: double pulse, error: long)
   - Implement vibration API wrapper with fallback
@@ -214,7 +230,11 @@
   - **Property 23: Emergency triggers long haptic vibration**
   - **Validates: Requirements 6.5**
 
-- [ ] 12. Implement audio player component
+- [x] 12. Implement audio player component
+
+
+
+
   - Create AudioPlayer component with auto-play support
   - Handle both URL and base64 audio sources
   - Implement playback state management
@@ -227,7 +247,11 @@
   - **Property 5: Backend response triggers audio playback**
   - **Validates: Requirements 1.5**
 
-- [ ] 13. Implement camera capture component
+
+- [x] 13. Implement camera capture component
+
+
+
   - Create CameraCapture component
   - Request camera permissions
   - Implement single frame capture mode
@@ -245,7 +269,12 @@
   - **Property 16: Scanning mode captures frames continuously**
   - **Validates: Requirements 5.2**
 
-- [ ] 14. Implement voice input component
+- [x] 14. Implement voice input component
+
+
+
+
+
   - Create VoiceInputButton component with large microphone button
   - Implement press-and-hold recording logic
   - Use MediaRecorder API for audio capture
@@ -263,7 +292,11 @@
   - **Property 3: Button release stops recording and sends audio**
   - **Validates: Requirements 1.3**
 
-- [ ] 15. Implement API client service
+- [x] 15. Implement API client service
+
+
+
+
   - Create API client with axios
   - Implement functions for all backend endpoints
   - Add request/response interceptors
@@ -280,7 +313,12 @@
   - **Property 4: STT completion triggers backend call**
   - **Validates: Requirements 1.4**
 
-- [ ] 16. Implement main interface with action buttons
+- [x] 16. Implement main interface with action buttons
+
+
+
+
+
   - Create MainInterface component
   - Implement three large action buttons: "Describe Scene", "Read Text", "Ask Sahaay"
   - Position microphone button at bottom
@@ -304,7 +342,11 @@
   - **Property 27: All buttons use full-screen sizing**
   - **Validates: Requirements 7.6**
 
-- [ ] 17. Implement scene description flow
+
+
+- [x] 17. Implement scene description flow
+
+
   - Wire "Describe Scene" button to camera capture
   - Send captured image to /api/scene-description
   - Display processing state with haptic feedback
@@ -314,6 +356,7 @@
   - _Requirements: 2.1, 2.2, 2.6_
 
 - [ ] 18. Implement text reading flow
+
   - Wire "Read Text" button to camera capture
   - Send captured image to /api/read-text
   - Display processing state with haptic feedback

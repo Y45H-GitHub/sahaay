@@ -1,2 +1,5 @@
 export { default as AudioPlayer } from './AudioPlayer'
 export { default as CameraCapture } from './CameraCapture'
+export { default as MainInterface } from './MainInterface'
+export { default as VoiceInputButton } from './VoiceInputButton'
+export { default as VoiceInputDemo } from './VoiceInputDemo'

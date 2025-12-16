@@ -1,0 +1,294 @@
+/* VoiceInputButton Component Styles */
+.voice-input-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+/* Main microphone button - large round button */
+.voice-input-button {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    font-size: var(--font-size-xlarge);
+    font-weight: var(--font-weight-bold);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: var(--border-width) solid var(--color-text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    /* Center content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    /* Ensure accessibility */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+
+    /* Prevent text selection during press-and-hold */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.voice-input-button:hover:not(:disabled) {
+    background-color: var(--color-text);
+    color: var(--color-background);
+    transform: scale(1.05);
+}
+
+.voice-input-button:focus {
+    outline: var(--focus-outline-width) solid var(--color-focus);
+    outline-offset: 4px;
+}
+
+.voice-input-button:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+/* Button states */
+.voice-input-button.requesting {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border-color: var(--color-text);
+    animation: pulse 1s infinite;
+}
+
+.voice-input-button.recording {
+    background-color: var(--color-text);
+    color: var(--color-background);
+    border-color: var(--color-text);
+    animation: recording-pulse 0.8s infinite;
+    transform: scale(1.1);
+}
+
+.voice-input-button.processing {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border-color: var(--color-text);
+    animation: processing-spin 1s linear infinite;
+}
+
+.voice-input-button.error {
+    background-color: var(--color-background);
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+    animation: error-shake 0.5s ease-in-out;
+}
+
+.voice-input-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.voice-input-button:disabled:hover {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    transform: none;
+}
+
+/* Button text */
+.button-text {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90%;
+}
+
+/* Error message display */
+.voice-input-error {
+    background-color: var(--color-background);
+    color: #ff6b6b;
+    border: var(--border-width) solid #ff6b6b;
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm);
+    text-align: center;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+/* Instructions text */
+.voice-input-instructions {
+    text-align: center;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+    opacity: 0.8;
+    max-width: 250px;
+}
+
+.voice-input-instructions p {
+    margin: 0;
+    line-height: var(--line-height);
+}
+
+/* Animations */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes recording-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+}
+
+@keyframes processing-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes error-shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .voice-input-button {
+        width: 80px;
+        height: 80px;
+        font-size: var(--font-size-large);
+    }
+
+    .voice-input-instructions {
+        font-size: calc(var(--font-size-base) - 2px);
+    }
+}
+
+@media (max-width: 480px) {
+    .voice-input-button {
+        width: 70px;
+        height: 70px;
+        font-size: var(--font-size-base);
+    }
+
+    .voice-input-error {
+        font-size: calc(var(--font-size-base) - 2px);
+        padding: calc(var(--spacing-sm) - 4px);
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+    .voice-input-button {
+        width: 60px;
+        height: 60px;
+        font-size: var(--font-size-base);
+    }
+
+    .voice-input-container {
+        gap: calc(var(--spacing-sm) / 2);
+    }
+}
+
+/* High contrast mode enhancements */
+@media (prefers-contrast: high) {
+    .voice-input-button {
+        border-width: 3px;
+    }
+
+    .voice-input-button:focus {
+        outline-width: 6px;
+    }
+
+    .voice-input-error {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .voice-input-button {
+        transition: none;
+    }
+
+    .voice-input-button.requesting,
+    .voice-input-button.recording,
+    .voice-input-button.processing,
+    .voice-input-button.error {
+        animation: none;
+    }
+
+    .voice-input-button.recording {
+        background-color: var(--color-text);
+        color: var(--color-background);
+        transform: scale(1.05);
+    }
+}
+
+/* Print styles */
+@media print {
+    .voice-input-button {
+        display: none;
+    }
+
+    .voice-input-instructions::after {
+        content: " (Voice input not available in print)";
+    }
+}
+
+/* Focus visible for better keyboard navigation */
+.voice-input-button:focus-visible {
+    outline: var(--focus-outline-width) solid var(--color-focus);
+    outline-offset: 4px;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .voice-input-button:hover {
+        background-color: var(--color-background);
+        color: var(--color-text);
+        transform: none;
+    }
+
+    .voice-input-button:active:not(:disabled) {
+        background-color: var(--color-text);
+        color: var(--color-background);
+        transform: scale(0.95);
+    }
+}
