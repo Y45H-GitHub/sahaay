@@ -1,0 +1,53 @@
+/**
+ * CameraCapture Component Styles
+ * 
+ * Provides minimal styling for the camera capture component.
+ * Most elements are hidden as this is a headless component for voice-first interaction.
+ */
+
+.camera-capture {
+    position: relative;
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Development mode test button styling */
+.camera-capture button {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.camera-capture button:hover:not(:disabled) {
+    background-color: #555 !important;
+}
+
+.camera-capture button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Ensure video and canvas are completely hidden */
+.camera-capture video,
+.camera-capture canvas {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}

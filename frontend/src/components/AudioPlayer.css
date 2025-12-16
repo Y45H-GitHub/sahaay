@@ -1,0 +1,135 @@
+/* AudioPlayer Component Styles */
+.audio-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #000000;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 18px;
+    min-height: 60px;
+}
+
+.audio-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #000000;
+}
+
+.audio-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #000000;
+    border: 2px solid #ff0000;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.audio-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.audio-control-button {
+    background-color: #000000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    padding: 1rem 2rem;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    min-width: 120px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.audio-control-button:hover {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.audio-control-button:focus {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+}
+
+.audio-control-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #666666;
+    color: #666666;
+}
+
+.audio-control-button:disabled:hover {
+    background-color: #000000;
+    color: #666666;
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* High contrast and accessibility */
+@media (prefers-contrast: high) {
+    .audio-control-button {
+        border-width: 3px;
+    }
+
+    .audio-error {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .audio-control-button {
+        transition: none;
+    }
+}
+
+/* Large text support */
+@media (min-width: 768px) {
+    .audio-player {
+        font-size: 20px;
+    }
+
+    .audio-control-button {
+        font-size: 20px;
+        padding: 1.25rem 2.5rem;
+        min-height: 70px;
+    }
+
+    .audio-loading,
+    .audio-error {
+        font-size: 20px;
+    }
+}
