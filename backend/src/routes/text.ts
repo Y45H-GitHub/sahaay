@@ -7,7 +7,15 @@ import { ReadTextResponse } from '../types/api';
 
 const router = Router();
 const ocrService = createOCRService();
-const ttsService = createMurfTTSService();
+
+function getTTSService() {
+    try {
+        return createMurfTTSService();
+    } catch (error) {
+        console.error('Failed to create TTS service:', error);
+        return null;
+    }
+}
 
 // POST /api/read-text
 router.post('/', uploadImage, asyncHandler(async (req: Request, res: Response) => {
@@ -25,9 +33,12 @@ router.post('/', uploadImage, asyncHandler(async (req: Request, res: Response) =
 
     try {
         // Extract text from image using OCR
+        console.log('Starting OCR processing...');
         const ocrResult = await ocrService.extractText(imageFile.buffer, language);
+        console.log('OCR processing completed:', ocrResult);
 
         if (!ocrResult.success) {
+            console.error('OCR failed:', ocrResult.error);
             return res.status(500).json({
                 error: {
                     message: ocrResult.error || 'OCR processing failed',
@@ -41,10 +52,11 @@ router.post('/', uploadImage, asyncHandler(async (req: Request, res: Response) =
             const noTextMessage = 'No readable text found in the image';
 
             // Convert "no text found" message to speech
-            const ttsResult = await ttsService.convertTextToSpeech({
+            const ttsService = getTTSService();
+            const ttsResult = ttsService ? await ttsService.convertTextToSpeech({
                 text: noTextMessage,
                 language: language
-            });
+            }) : { success: false };
 
             const response: ReadTextResponse = {
                 text: noTextMessage,
@@ -55,10 +67,11 @@ router.post('/', uploadImage, asyncHandler(async (req: Request, res: Response) =
         }
 
         // Convert extracted text to speech
-        const ttsResult = await ttsService.convertTextToSpeech({
+        const ttsService = getTTSService();
+        const ttsResult = ttsService ? await ttsService.convertTextToSpeech({
             text: ocrResult.text,
             language: language
-        });
+        }) : { success: false };
 
         const response: ReadTextResponse = {
             text: ocrResult.text,

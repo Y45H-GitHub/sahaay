@@ -53,9 +53,12 @@ export class OCRService {
             // Use the requested language or default to English
             const tesseractLanguage = language ? this.mapLanguageCode(language) : 'eng';
 
-            this.worker = await createWorker(tesseractLanguage, 1, {
-                logger: this.config.enableLogging ? (m) => console.log(m) : undefined
-            });
+            const workerOptions: any = {};
+            if (this.config.enableLogging) {
+                workerOptions.logger = (m: any) => console.log(m);
+            }
+
+            this.worker = await createWorker(tesseractLanguage, 1, workerOptions);
             this.isInitialized = true;
         } catch (error) {
             console.error('Failed to initialize OCR worker:', error);

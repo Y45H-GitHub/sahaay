@@ -27,8 +27,8 @@ export interface MainInterfaceProps {
 }
 
 // Application state types
-type AppState = 'idle' | 'recording' | 'processing' | 'playing';
-type ActionMode = 'scene' | 'text' | 'general' | null;
+type AppState = 'idle' | 'recording' | 'processing' | 'playing' | 'scanning';
+type ActionMode = 'scene' | 'text' | 'general' | 'finder' | null;
 
 // Language options
 const LANGUAGE_OPTIONS = [
@@ -46,6 +46,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
     const [audioUrl, setAudioUrl] = useState<string | undefined>();
     const [audioBase64, setAudioBase64] = useState<string | undefined>();
     const [error, setError] = useState<string | null>(null);
+    const [targetObject, setTargetObject] = useState<string>('');
+    const [scanningMessage, setScanningMessage] = useState<string>('');
 
     /**
      * Handle errors with haptic feedback and voice cues
@@ -55,6 +57,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         setError(userMessage);
         setAppState('idle');
         setActiveMode(null);
+        setTargetObject('');
+        setScanningMessage('');
         triggerErrorHaptic();
 
         // Provide voice feedback for errors
@@ -108,8 +112,24 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
     }, [appState]);
 
     /**
-     * Handle ask Sahaay button press
+     * Cancel scanning mode
      */
+    const cancelScanning = useCallback(() => {
+        if (activeMode === 'finder' && appState === 'scanning') {
+            setAppState('idle');
+            setActiveMode(null);
+            setTargetObject('');
+            setScanningMessage('');
+
+            // Provide voice feedback
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance('Scanning cancelled.');
+                utterance.rate = 0.9;
+                utterance.volume = 1.0;
+                speechSynthesis.speak(utterance);
+            }
+        }
+    }, [activeMode, appState]);
     const handleAskSahaay = useCallback(() => {
         if (appState !== 'idle') return;
 
@@ -129,7 +149,70 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
      * Handle camera capture for scene description and text reading
      */
     const handleCameraCapture = useCallback(async (imageBlob: Blob) => {
-        if (!activeMode || (activeMode !== 'scene' && activeMode !== 'text')) return;
+        if (!activeMode) return;
+
+        // Handle finder mode differently - continuous scanning
+        if (activeMode === 'finder') {
+            if (appState !== 'scanning') return;
+
+            try {
+                console.log(`Scanning for ${targetObject}:`, imageBlob);
+
+                // Send image to find-object API
+                const response = await apiClient.findObject(imageBlob, targetObject, language);
+
+                console.log('Object finder response:', response);
+
+                if (response.found) {
+                    // Object found! Exit scanning mode and play guidance
+                    setAppState('playing');
+                    setScanningMessage('');
+
+                    // Set audio for playback
+                    if (response.audioUrl) {
+                        setAudioUrl(response.audioUrl);
+                        setAudioBase64(undefined);
+                    } else {
+                        // Fallback to browser TTS if no audio URL provided
+                        if ('speechSynthesis' in window) {
+                            const utterance = new SpeechSynthesisUtterance(response.message);
+                            utterance.rate = 0.9;
+                            utterance.volume = 1.0;
+
+                            utterance.onstart = () => {
+                                setAppState('playing');
+                            };
+
+                            utterance.onend = () => {
+                                setAppState('idle');
+                                setActiveMode(null);
+                                setTargetObject('');
+                            };
+
+                            speechSynthesis.speak(utterance);
+                            return;
+                        }
+                    }
+                } else {
+                    // Object not found, continue scanning
+                    // Update scanning message occasionally to provide feedback
+                    const messages = [
+                        `Still looking for ${targetObject}...`,
+                        `Scanning for ${targetObject}...`,
+                        `Keep moving the camera to help me find ${targetObject}...`
+                    ];
+                    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                    setScanningMessage(randomMessage);
+                }
+
+            } catch (error) {
+                handleError(error as Error, `Failed to scan for ${targetObject}. Please try again.`);
+            }
+            return;
+        }
+
+        // Handle scene description and text reading (single capture)
+        if (activeMode !== 'scene' && activeMode !== 'text') return;
 
         setAppState('processing');
         triggerProcessingHaptic();
@@ -202,13 +285,22 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         } catch (error) {
             handleError(error as Error, `Failed to process ${activeMode} image. Please try again.`);
         }
-    }, [activeMode, language, handleError]);
+    }, [activeMode, language, handleError, appState, targetObject]);
 
     /**
      * Handle voice input transcript
      */
     const handleVoiceTranscript = useCallback(async (transcript: string) => {
         if (!transcript.trim()) return;
+
+        // Handle cancel commands during scanning
+        if (activeMode === 'finder' && appState === 'scanning') {
+            const cancelWords = ['cancel', 'stop', 'quit', 'exit', 'done'];
+            if (cancelWords.some(word => transcript.toLowerCase().includes(word))) {
+                cancelScanning();
+                return;
+            }
+        }
 
         // Only process voice queries when in general mode
         if (activeMode !== 'general') return;
@@ -224,6 +316,28 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
             const response = await apiClient.sendTextQuery(transcript, language);
 
             console.log('Voice query response:', response);
+
+            // Check if this is a finder intent
+            if (response.intent === 'finder') {
+                // Extract target object from response or transcript
+                const objectMatch = transcript.toLowerCase().match(/(?:find|locate|where is|search for|look for)\s+(?:the\s+)?(.+)/);
+                const extractedObject = objectMatch ? objectMatch[1].trim() : 'object';
+
+                setTargetObject(extractedObject);
+                setActiveMode('finder');
+                setAppState('scanning');
+                setScanningMessage(`Scanning for ${extractedObject}...`);
+
+                // Provide voice feedback for starting scan
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(`Starting to scan for ${extractedObject}. Move your camera around to help me find it. Say "cancel" to stop scanning.`);
+                    utterance.rate = 0.9;
+                    utterance.volume = 1.0;
+                    speechSynthesis.speak(utterance);
+                }
+
+                return;
+            }
 
             // Set audio for playback if provided by backend
             if (response.audioUrl) {
@@ -253,7 +367,7 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         } catch (error) {
             handleError(error as Error, 'Failed to process your question. Please try again.');
         }
-    }, [activeMode, language, handleError]);
+    }, [activeMode, language, handleError, appState, cancelScanning]);
 
     /**
      * Handle voice input errors
@@ -275,6 +389,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
     const handleAudioPlayEnd = useCallback(() => {
         setAppState('idle');
         setActiveMode(null);
+        setTargetObject('');
+        setScanningMessage('');
     }, []);
 
     /**
@@ -295,6 +411,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
                 return 'Processing request';
             case 'playing':
                 return 'Playing audio response';
+            case 'scanning':
+                return scanningMessage || `Scanning for ${targetObject}`;
             default:
                 return 'Ready for input';
         }
@@ -389,10 +507,10 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
             {/* Camera Capture Component */}
             <CameraCapture
                 onCapture={handleCameraCapture}
-                mode={activeMode === 'scene' ? 'scene' : activeMode === 'text' ? 'text' : 'scene'}
-                continuous={false}
+                mode={activeMode === 'scene' ? 'scene' : activeMode === 'text' ? 'text' : activeMode === 'finder' ? 'finder' : 'scene'}
+                continuous={activeMode === 'finder'}
                 onError={(error) => handleError(error, 'Camera error occurred.')}
-                isActive={activeMode === 'scene' || activeMode === 'text'}
+                isActive={activeMode === 'scene' || activeMode === 'text' || activeMode === 'finder'}
             />
 
             {/* Audio Player Component */}

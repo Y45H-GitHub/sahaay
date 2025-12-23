@@ -347,6 +347,7 @@
 - [x] 17. Implement scene description flow
 
 
+
   - Wire "Describe Scene" button to camera capture
   - Send captured image to /api/scene-description
   - Display processing state with haptic feedback
@@ -355,7 +356,11 @@
   - **Git commit and push: "Implement scene description flow with camera integration"**
   - _Requirements: 2.1, 2.2, 2.6_
 
-- [ ] 18. Implement text reading flow
+
+- [x] 18. Implement text reading flow
+
+
+
 
   - Wire "Read Text" button to camera capture
   - Send captured image to /api/read-text
@@ -365,7 +370,12 @@
   - **Git commit and push: "Implement text reading flow with OCR integration"**
   - _Requirements: 3.1, 3.2, 3.5_
 
-- [ ] 19. Implement general question flow
+
+
+- [x] 19. Implement general question flow
+
+
+
   - Wire "Ask Sahaay" button to voice input
   - Send transcribed query to /api/voice-query
   - Display processing state with haptic feedback
@@ -374,7 +384,10 @@
   - **Git commit and push: "Implement general question flow with voice input"**
   - _Requirements: 4.1, 4.2, 4.5_
 
-- [ ] 20. Implement object finder mode
+- [-] 20. Implement object finder mode
+
+
+
   - Detect finder intent from voice input
   - Enter scanning mode with continuous camera capture
   - Send frames to /api/find-object with target object name
