@@ -2,7 +2,22 @@ import React, { useState, useCallback } from 'react';
 import VoiceInputButton from './VoiceInputButton';
 import CameraCapture from './CameraCapture';
 import AudioPlayer from './AudioPlayer';
-import { triggerProcessingHaptic, triggerErrorHaptic } from '../services/HapticFeedback';
+import {
+    triggerProcessingHaptic,
+    triggerErrorHaptic,
+    triggerEmergencyHaptic
+} from '../services/HapticFeedback';
+import {
+    announceError,
+    announceSceneActivated,
+    announceTextActivated,
+    announceGeneralActivated,
+    announceScanningStarted,
+    announceScanningCancelled,
+    announceEmergencyActivated,
+    announceProcessing,
+    announceSuccess
+} from '../services/VoiceCues';
 import apiClient from '../services/ApiClient';
 import './MainInterface.css';
 
@@ -61,13 +76,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         setScanningMessage('');
         triggerErrorHaptic();
 
-        // Provide voice feedback for errors
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(userMessage);
-            utterance.rate = 0.9;
-            utterance.volume = 1.0;
-            speechSynthesis.speak(utterance);
-        }
+        // Provide voice feedback for errors using VoiceCues service
+        announceError(userMessage);
 
         // Clear error after 5 seconds
         setTimeout(() => {
@@ -85,12 +95,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         setActiveMode('scene');
         setError(null);
 
-        // Voice cue for scene description
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance('Activating scene description. Point camera at what you want described.');
-            utterance.rate = 0.9;
-            speechSynthesis.speak(utterance);
-        }
+        // Voice cue for scene description activation
+        announceSceneActivated();
     }, [appState]);
 
     /**
@@ -103,12 +109,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         setActiveMode('text');
         setError(null);
 
-        // Voice cue for text reading
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance('Activating text reading. Point camera at text you want read aloud.');
-            utterance.rate = 0.9;
-            speechSynthesis.speak(utterance);
-        }
+        // Voice cue for text reading activation
+        announceTextActivated();
     }, [appState]);
 
     /**
@@ -121,13 +123,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
             setTargetObject('');
             setScanningMessage('');
 
-            // Provide voice feedback
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance('Scanning cancelled.');
-                utterance.rate = 0.9;
-                utterance.volume = 1.0;
-                speechSynthesis.speak(utterance);
-            }
+            // Provide voice feedback using VoiceCues service
+            announceScanningCancelled();
         }
     }, [activeMode, appState]);
     const handleAskSahaay = useCallback(() => {
@@ -137,12 +134,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         setActiveMode('general');
         setError(null);
 
-        // Voice cue for general questions
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance('Ready to answer your question. Press and hold the microphone to speak.');
-            utterance.rate = 0.9;
-            speechSynthesis.speak(utterance);
-        }
+        // Voice cue for general questions activation
+        announceGeneralActivated();
     }, [appState]);
 
     /**
@@ -217,6 +210,9 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         setAppState('processing');
         triggerProcessingHaptic();
 
+        // Voice cue for processing state
+        announceProcessing();
+
         try {
             console.log(`Processing ${activeMode} image:`, imageBlob);
 
@@ -244,6 +240,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
                         utterance.onend = () => {
                             setAppState('idle');
                             setActiveMode(null);
+                            // Voice cue for successful completion
+                            announceSuccess();
                         };
 
                         speechSynthesis.speak(utterance);
@@ -274,6 +272,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
                         utterance.onend = () => {
                             setAppState('idle');
                             setActiveMode(null);
+                            // Voice cue for successful completion
+                            announceSuccess();
                         };
 
                         speechSynthesis.speak(utterance);
@@ -288,10 +288,124 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
     }, [activeMode, language, handleError, appState, targetObject]);
 
     /**
+     * Handle emergency trigger
+     */
+    const handleEmergencyTrigger = useCallback(async (transcript: string) => {
+        console.log('🚨 Emergency triggered:', transcript);
+
+        // Trigger emergency haptic feedback immediately
+        triggerEmergencyHaptic();
+
+        // Voice cue for emergency activation
+        announceEmergencyActivated();
+
+        // Set state to processing
+        setAppState('processing');
+        setActiveMode(null);
+        setError(null);
+
+        try {
+            // Get current location if available
+            let location: { latitude: number; longitude: number } | undefined;
+
+            if ('geolocation' in navigator) {
+                try {
+                    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            timeout: 5000,
+                            enableHighAccuracy: true,
+                            maximumAge: 60000
+                        });
+                    });
+
+                    location = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+
+                    console.log('Emergency location obtained:', location);
+                } catch (locationError) {
+                    console.warn('Could not get location for emergency:', locationError);
+                    // Continue without location - emergency is more important
+                }
+            }
+
+            // Send emergency notification to backend
+            const response = await apiClient.triggerEmergency(location, language);
+
+            console.log('Emergency response:', response);
+
+            // Play urgent TTS confirmation
+            if (response.audioUrl) {
+                setAudioUrl(response.audioUrl);
+                setAudioBase64(undefined);
+            } else {
+                // Fallback to browser TTS with urgent tone
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(response.message);
+                    utterance.rate = 1.1; // Slightly faster for urgency
+                    utterance.volume = 1.0;
+                    utterance.pitch = 1.2; // Higher pitch for urgency
+
+                    utterance.onstart = () => {
+                        setAppState('playing');
+                    };
+
+                    utterance.onend = () => {
+                        setAppState('idle');
+                        setActiveMode(null);
+                    };
+
+                    speechSynthesis.speak(utterance);
+                    return;
+                }
+            }
+
+        } catch (error) {
+            console.error('Emergency trigger failed:', error);
+
+            // Even if emergency API fails, provide immediate voice feedback
+            const fallbackMessage = 'Emergency mode activated. If this is a critical situation, please call emergency services immediately.';
+
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(fallbackMessage);
+                utterance.rate = 1.1;
+                utterance.volume = 1.0;
+                utterance.pitch = 1.2;
+
+                utterance.onstart = () => {
+                    setAppState('playing');
+                };
+
+                utterance.onend = () => {
+                    setAppState('idle');
+                    setActiveMode(null);
+                };
+
+                speechSynthesis.speak(utterance);
+            } else {
+                // If no TTS available, at least update the UI
+                setError(fallbackMessage);
+                setAppState('idle');
+                setActiveMode(null);
+            }
+        }
+    }, [language]);
+
+    /**
      * Handle voice input transcript
      */
     const handleVoiceTranscript = useCallback(async (transcript: string) => {
         if (!transcript.trim()) return;
+
+        // Check for emergency trigger FIRST - highest priority
+        const normalizedTranscript = transcript.toLowerCase().trim();
+        if (normalizedTranscript.includes('sahaay emergency') ||
+            normalizedTranscript.includes('emergency')) {
+            // Trigger emergency immediately, regardless of current mode
+            await handleEmergencyTrigger(transcript);
+            return;
+        }
 
         // Handle cancel commands during scanning
         if (activeMode === 'finder' && appState === 'scanning') {
@@ -307,6 +421,9 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
 
         setAppState('processing');
         triggerProcessingHaptic();
+
+        // Voice cue for processing state
+        announceProcessing();
 
         try {
             console.log('Processing voice query:', transcript);
@@ -328,13 +445,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
                 setAppState('scanning');
                 setScanningMessage(`Scanning for ${extractedObject}...`);
 
-                // Provide voice feedback for starting scan
-                if ('speechSynthesis' in window) {
-                    const utterance = new SpeechSynthesisUtterance(`Starting to scan for ${extractedObject}. Move your camera around to help me find it. Say "cancel" to stop scanning.`);
-                    utterance.rate = 0.9;
-                    utterance.volume = 1.0;
-                    speechSynthesis.speak(utterance);
-                }
+                // Provide voice feedback for starting scan using VoiceCues service
+                announceScanningStarted(extractedObject);
 
                 return;
             }
@@ -357,6 +469,8 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
                     utterance.onend = () => {
                         setAppState('idle');
                         setActiveMode(null);
+                        // Voice cue for successful completion
+                        announceSuccess();
                     };
 
                     speechSynthesis.speak(utterance);
@@ -367,7 +481,7 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         } catch (error) {
             handleError(error as Error, 'Failed to process your question. Please try again.');
         }
-    }, [activeMode, language, handleError, appState, cancelScanning]);
+    }, [activeMode, language, handleError, appState, cancelScanning, handleEmergencyTrigger]);
 
     /**
      * Handle voice input errors
@@ -391,6 +505,9 @@ const MainInterface: React.FC<MainInterfaceProps> = ({
         setActiveMode(null);
         setTargetObject('');
         setScanningMessage('');
+
+        // Voice cue for successful completion
+        announceSuccess();
     }, []);
 
     /**

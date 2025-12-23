@@ -1,5 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { triggerListeningHaptic, triggerErrorHaptic } from '../services/HapticFeedback';
+import { announceError, announceListening } from '../services/VoiceCues';
 import './VoiceInputButton.css';
 
 /**
@@ -55,13 +56,8 @@ const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
         setRecordingState('error');
         triggerErrorHaptic();
 
-        // Provide voice feedback for errors
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(userMessage);
-            utterance.rate = 0.9;
-            utterance.volume = 1.0;
-            speechSynthesis.speak(utterance);
-        }
+        // Provide voice feedback for errors using VoiceCues service
+        announceError(userMessage);
 
         onError(error);
 
@@ -199,6 +195,9 @@ const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({
         try {
             // Trigger haptic feedback for recording start
             triggerListeningHaptic();
+
+            // Voice cue for listening state
+            announceListening();
 
             // Initialize speech recognition
             const recognition = initializeSpeechRecognition();
